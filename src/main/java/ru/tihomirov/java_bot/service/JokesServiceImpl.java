@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import ru.tihomirov.java_bot.exceptions.JokesNotFoundException;
 import ru.tihomirov.java_bot.model.Jokes;
 import ru.tihomirov.java_bot.repository.JokesRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,13 +24,11 @@ public class JokesServiceImpl implements JokesService{
         return jokesRepository.save(joke);
     }
 
-    public List<Jokes> getAllJokes(String title) {
+    public Page<Jokes> getAllJokes(String title, Pageable pageable) {
         if (title != null) {
-            return StreamSupport.stream(jokesRepository.findAll().spliterator(), false)
-                    .filter(joke -> title.equals(joke.getTitle()))
-                    .collect(Collectors.toList());
+            return jokesRepository.findByTitle(title, pageable);
         } else {
-            return (List<Jokes>) jokesRepository.findAll();
+            return jokesRepository.findAll(pageable);
         }
     }
 

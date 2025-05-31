@@ -7,6 +7,10 @@ import org.springframework.web.bind.annotation.*;
 import ru.tihomirov.java_bot.model.Jokes;
 import ru.tihomirov.java_bot.service.JokesService;
 import ru.tihomirov.java_bot.service.JokesServiceImpl;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+
 
 import java.util.List;
 
@@ -28,9 +32,15 @@ public class JokesController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Jokes>> getAllJokes(@RequestParam(value = "title", required = false) String title) {
-        List<Jokes> jokes = jokesService.getAllJokes(title);
-        return ResponseEntity.ok(jokes);
+    public ResponseEntity<List<Jokes>> getAllJokes(
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Jokes> jokesPage = jokesService.getAllJokes(title, pageable);
+        List<Jokes> jokesList = jokesPage.getContent();
+        return ResponseEntity.ok(jokesList);
     }
 
     @GetMapping("/{id}")

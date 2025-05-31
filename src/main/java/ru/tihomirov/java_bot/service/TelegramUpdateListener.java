@@ -8,6 +8,9 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import ru.tihomirov.java_bot.model.Jokes;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -35,11 +38,13 @@ public class TelegramUpdateListener implements UpdatesListener {
                 }
 
                 if (update.message().text().equals("/jokes")) {
-                    List<Jokes> jokes = jokesService.getAllJokes(null);
+                    Pageable pageable = PageRequest.of(0, 100);
+                    Page<Jokes> jokesPage = jokesService.getAllJokes(null, pageable);
+                    List<Jokes> jokes = jokesPage.getContent();
 
                     if (!jokes.isEmpty()) {
                         Jokes joke = jokes.get((int) (Math.random() * jokes.size()));
-                        String text = '"'+ joke.getTitle() + '"' +'.'+ "\n" + joke.getContent();
+                        String text = '"' + joke.getTitle() + '"' + '.' + "\n" + joke.getContent();
                         telegramBot.execute(new SendMessage(update.message().chat().id(), text));
                     }
                 }
