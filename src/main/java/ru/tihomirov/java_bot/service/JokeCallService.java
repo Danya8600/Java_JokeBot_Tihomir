@@ -14,4 +14,7 @@ public interface JokeCallService {
     List<JokeCall> getJokeCallsByJokeId(Long jokeId);
 
     JokeCall saveJokeCall(JokeCall jokeCall);
+
+    List<Long> getTopJokeIds(int limit);
+
 }

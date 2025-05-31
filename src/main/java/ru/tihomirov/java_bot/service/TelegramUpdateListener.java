@@ -15,12 +15,13 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class TelegramUpdateListener implements UpdatesListener {
 
     private final JokesService jokesService;
-    private final JokeCallService jokeCallService;  // ← добавляем сервис вызова
+    private final JokeCallService jokeCallService;
     private final TelegramBot telegramBot;
 
     public TelegramUpdateListener(JokesService jokesService, JokeCallService jokeCallService, TelegramBot telegramBot) {
@@ -38,7 +39,7 @@ public class TelegramUpdateListener implements UpdatesListener {
 
                 if (messageText.equals("/start")) {
                     telegramBot.execute(new SendMessage(chatId,
-                            "Доступные команды:\n/jokes - случайная шутка"));
+                            "Доступные команды:\n/jokes - случайная шутка\n/topjokes - топ-5 популярных анекдотов"));
                 }
 
                 if (messageText.equals("/jokes")) {
@@ -51,13 +52,31 @@ public class TelegramUpdateListener implements UpdatesListener {
                         String text = '"' + joke.getTitle() + '"' + '.' + "\n" + joke.getContent();
                         telegramBot.execute(new SendMessage(chatId, text));
 
-                        // ← сохраняем вызов шутки
                         JokeCall jokeCall = new JokeCall();
                         jokeCall.setJokeId(joke.getId());
-                        jokeCall.setUserId(chatId);  // id пользователя из Telegram
-                        jokeCall.setCallTime(LocalDateTime.now());  // текущее время
+                        jokeCall.setUserId(chatId);
+                        jokeCall.setCallTime(LocalDateTime.now());
 
                         jokeCallService.saveJokeCall(jokeCall);
+                    }
+                }
+
+                if (messageText.equals("/topjokes")) {
+                    List<Long> topJokeIds = jokeCallService.getTopJokeIds(5);
+
+                    if (topJokeIds.isEmpty()) {
+                        telegramBot.execute(new SendMessage(chatId, "Топ пока пуст. Попробуйте позже!"));
+                    } else {
+                        StringBuilder sb = new StringBuilder("Топ-5 популярных анекдотов:\n");
+
+                        int rank = 1;
+                        for (Long jokeId : topJokeIds) {
+                                Jokes joke = jokesService.getJokesById(jokeId);
+                                sb.append(rank).append(". ").append(joke.getTitle()).append("\n");
+                                rank++;
+                        }
+
+                        telegramBot.execute(new SendMessage(chatId, sb.toString()));
                     }
                 }
             }
