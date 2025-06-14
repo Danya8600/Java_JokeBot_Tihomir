@@ -7,8 +7,8 @@ import java.util.Optional;
 
 public interface UserService {
     Optional<User> findByUsername(String username);
-    Optional<User> findById(Long id); // ➕ Добавлено
+    Optional<User> findById(Long id);
     void save(User user);
     void registerUser(RegisterRequest request);
-    void changeUserRole(Long userId, String newRoleName); // ➕ Добавлено
+    void changeUserRole(Long userId, String newRoleName);
 }

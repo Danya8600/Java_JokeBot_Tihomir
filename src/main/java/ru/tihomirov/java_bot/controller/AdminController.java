@@ -15,7 +15,6 @@ public class AdminController {
 
     private final UserService userService;
 
-    // Получить пользователя по ID
     @GetMapping("/user/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
         Optional<User> userOpt = userService.findById(id);
@@ -25,7 +24,6 @@ public class AdminController {
         return ResponseEntity.ok(userOpt.get());
     }
 
-    // Изменить роль пользователя
     @PutMapping("/user/{id}/role")
     public ResponseEntity<String> changeUserRole(
             @PathVariable Long id,
